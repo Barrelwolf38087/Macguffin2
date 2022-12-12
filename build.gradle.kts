@@ -13,7 +13,6 @@ repositories {
 dependencies {
     @Suppress("VulnerableLibrariesLocal")
     compileOnly("io.papermc.paper:paper-api:1.19.2-R0.1-SNAPSHOT")
-    implementation("com.github.stateless4j:stateless4j:2.6.0")
 }
 
 java {
