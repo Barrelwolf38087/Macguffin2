@@ -5,12 +5,12 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 public class Macguffin2 extends JavaPlugin {
 
@@ -44,13 +44,13 @@ public class Macguffin2 extends JavaPlugin {
         Location loc = Egg.data.getLocation();
         if (loc != null) {
             Block block = loc.getBlock();
-            block.setType(Material.OAK_SIGN);
+            block.setType(Material.AIR);
 
-            // Doesn't work :(
-            getServer().getScheduler().runTaskLater(this, () -> {
-                Sign sign = (Sign) block.getState();
-                sign.line(0, Component.text("getting milk brb"));
-            }, 1);
+//            // Doesn't work :(
+//            getServer().getScheduler().runTaskLater(this, () -> {
+//                Sign sign = (Sign) block.getState();
+//                sign.line(0, Component.text("getting milk brb"));
+//            }, 1);
 
             getLogger().info("Egg removed from " + loc);
         }
@@ -109,6 +109,8 @@ public class Macguffin2 extends JavaPlugin {
 
         EggTimeCheckTask timeCheckTask = new EggTimeCheckTask(this);
         timeCheckTask.runTaskTimer(this, 0, 20 * 30);
+
+        Objects.requireNonNull(getCommand("sniff")).setExecutor(new EggSniffCommand());
 
         getLogger().info("Successfully started Macguffin 2.0.1");
     }

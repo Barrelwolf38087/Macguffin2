@@ -17,9 +17,11 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffectType;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -173,7 +175,6 @@ public class EggListener implements Listener {
 
     @EventHandler
     public void onEntityDamage(EntityDamageEvent event) {
-
         if (event.getEntity() instanceof Item item) {
             if (item.getItemStack().getType() == Material.DRAGON_EGG) {
                 UUID thrower = item.getThrower();
@@ -235,6 +236,7 @@ public class EggListener implements Listener {
                 Egg.data.expiry = Instant.now().getEpochSecond() + Macguffin2.INVENTORY_TIME_LIMIT;
                 Egg.save();
                 player.sendMessage(Component.text("You have 20 minutes to place the egg, or it will teleport to spawn. Make haste!"));
+                player.removePotionEffect(PotionEffectType.INVISIBILITY);
             }
         }
     }
@@ -263,6 +265,7 @@ public class EggListener implements Listener {
                 }
 
                 Egg.data.state = State.PLACED;
+                Egg.data.setLocation(event.getBlockPlaced().getLocation());
                 Egg.data.expiry = Instant.now().getEpochSecond() + Macguffin2.TAP_INTERVAL;
                 Egg.save();
             }
@@ -274,6 +277,31 @@ public class EggListener implements Listener {
         if (event.getTo() == Material.DRAGON_EGG) {
             Egg.data.setLocation(event.getBlock().getLocation());
             Egg.save();
+        }
+    }
+
+    @EventHandler
+    public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+        if (event.getPlayer().getInventory().getItemInMainHand().getType() == Material.DRAGON_EGG
+                || event.getPlayer().getInventory().getItemInOffHand().getType() == Material.DRAGON_EGG) {
+            event.setCancelled(true);
+        }
+
+        if (event.getRightClicked() instanceof Player targetPlayer) {
+            if (Egg.data.state == State.INVENTORY && targetPlayer.getUniqueId() == Egg.data.holder) {
+                event.getPlayer().sendMessage(Component.text(targetPlayer.getName() + " is kinda sus").color(COLOR));
+            } else {
+                event.getPlayer().sendMessage(Component.text(targetPlayer.getName() + " isn't sus").color(COLOR));
+            }
+        }
+    }
+
+    @EventHandler
+    public void onEntityPotionEffect(EntityPotionEffectEvent event) {
+        if (Egg.data.state == State.INVENTORY && event.getEntity().getUniqueId() == Egg.data.holder
+            && event.getAction() == EntityPotionEffectEvent.Action.ADDED
+            && event.getModifiedType() == PotionEffectType.INVISIBILITY) {
+            event.setCancelled(true);
         }
     }
 }

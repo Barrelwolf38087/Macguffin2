@@ -6,3 +6,12 @@ author: Willow Leverone
 website: https://discord.gg/uuYRe6BUSh
 api-version: 1.19
 load: POSTWORLD
+commands:
+  sniff:
+    description: Check if the egg is nearby
+    usage: /sniff
+    permission: macguffin2.sniff
+permissions:
+  macguffin2.sniff:
+    description: Allows use of the sniff command
+    default: true
