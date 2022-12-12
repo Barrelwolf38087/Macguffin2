@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "gay.realmromp"
-version = "2.0.1"
+version = "2.0.2"
 
 repositories {
     mavenCentral()
@@ -12,7 +12,7 @@ repositories {
 
 dependencies {
     @Suppress("VulnerableLibrariesLocal")
-    compileOnly("io.papermc.paper:paper-api:1.19.2-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.19.3-R0.1-SNAPSHOT")
 }
 
 java {
