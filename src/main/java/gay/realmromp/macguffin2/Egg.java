@@ -2,7 +2,11 @@ package gay.realmromp.macguffin2;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BundleMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
@@ -60,6 +64,35 @@ public class Egg implements Serializable {
         data.state = State.VIRGIN;
         data.world = null;
         data.holder = null;
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static boolean hasEgg(ItemStack stack) {
+        if (stack == null) {
+            return false;
+        }
+
+        if (stack.getType() == Material.DRAGON_EGG) {
+            return true;
+        } else if (stack.getType() == Material.BUNDLE) {
+            return ((BundleMeta) stack.getItemMeta()).getItems().stream().anyMatch((ItemStack is) -> is.getType() == Material.DRAGON_EGG);
+        }
+
+        return false;
+    }
+
+    public static void removeFrom(Player player) {
+        if (hasEgg(player.getItemOnCursor())) {
+            // What's that? The bundle had other stuff? Tough shit lol
+            player.setItemOnCursor(null);
+        } else {
+            ItemStack[] stacks = player.getInventory().getContents();
+            for (ItemStack stack : stacks) {
+                if (hasEgg(stack)) {
+                    player.getInventory().remove(stack);
+                }
+            }
+        }
     }
 
     private String world;

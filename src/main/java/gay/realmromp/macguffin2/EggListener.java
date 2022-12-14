@@ -18,6 +18,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -29,6 +30,7 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import static gay.realmromp.macguffin2.Macguffin2.COLOR;
+import static gay.realmromp.macguffin2.Egg.hasEgg;
 
 public class EggListener implements Listener {
 
@@ -38,6 +40,11 @@ public class EggListener implements Listener {
     public EggListener(Macguffin2 plugin) {
         this.plugin = plugin;
         this.logger = plugin.getLogger();
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Egg.removeFrom(event.getPlayer());
     }
 
     @EventHandler
@@ -138,34 +145,9 @@ public class EggListener implements Listener {
         }
     }
 
-    @SuppressWarnings("UnstableApiUsage")
-    public static boolean hasEgg(ItemStack stack) {
-        if (stack == null) {
-            return false;
-        }
 
-        if (stack.getType() == Material.DRAGON_EGG) {
-            return true;
-        } else if (stack.getType() == Material.BUNDLE) {
-            return ((BundleMeta) stack.getItemMeta()).getItems().stream().anyMatch((ItemStack is) -> is.getType() == Material.DRAGON_EGG);
-        }
 
-        return false;
-    }
 
-    public static void removeEgg(Player player) {
-        if (hasEgg(player.getItemOnCursor())) {
-            // What's that? The bundle had other stuff? Tough shit lol
-            player.setItemOnCursor(null);
-        } else {
-            ItemStack[] stacks = player.getInventory().getContents();
-            for (ItemStack stack : stacks) {
-                if (hasEgg(stack)) {
-                    player.getInventory().remove(stack);
-                }
-            }
-        }
-    }
 
     // THIS is the one for that
     @EventHandler
@@ -230,7 +212,7 @@ public class EggListener implements Listener {
             if (event.isCancelled()) {
                 plugin.getServer().broadcast(Component.text("Someone tried to put the egg in a container!").color(COLOR));
 //                player.getInventory().remove(Material.DRAGON_EGG);
-                removeEgg(player);
+                Egg.removeFrom(player);
                 plugin.resetEgg();
             }
         }
@@ -243,7 +225,7 @@ public class EggListener implements Listener {
             if (event.getPlayer().getInventory().contains(Material.DRAGON_EGG)) {
                 plugin.getServer().broadcast(Component.text("Someone logged out with the egg in their inventory!").color(COLOR));
 //                event.getPlayer().getInventory().remove(Material.DRAGON_EGG);
-                removeEgg(event.getPlayer());
+                Egg.removeFrom(event.getPlayer());
                 plugin.resetEgg();
             }
         }

@@ -2,7 +2,6 @@ package gay.realmromp.macguffin2;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -28,8 +27,8 @@ public class EggTimeCheckTask extends BukkitRunnable {
                     if (player != null) {
                         player.sendMessage(Component.text("Dumbass").color(COLOR));
                         Bukkit.broadcast(Component.text(player.getName() + " took too long to place the egg! "
-                            + "Laugh at this user."));
-                        player.getInventory().remove(Material.DRAGON_EGG);
+                            + "Laugh at this user.").color(COLOR));
+                        Egg.removeFrom(player);
                     }
                 } else {
                     plugin.getLogger().severe("Egg timed out in inventory, but no holder was set! The egg is duped.");

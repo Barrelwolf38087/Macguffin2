@@ -37,7 +37,8 @@ public class Macguffin2 extends JavaPlugin {
             } else {
                 getLogger().info("Removing egg from " + player.getName() + " (UUID " + player.getUniqueId()
                     + ")'s inventory");
-                player.getInventory().remove(Material.DRAGON_EGG);
+
+                Egg.removeFrom(player);
             }
         }
 
