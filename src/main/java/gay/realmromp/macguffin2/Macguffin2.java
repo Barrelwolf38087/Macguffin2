@@ -84,7 +84,7 @@ public class Macguffin2 extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        getLogger().info("Starting Macguffin 2.0.2");
+        getLogger().info("Starting Macguffin " + this.getDescription().getVersion());
         File dataFolder = getDataFolder();
         if (!dataFolder.exists()) {
             if (!dataFolder.mkdir()) {
@@ -112,7 +112,7 @@ public class Macguffin2 extends JavaPlugin {
 
         Objects.requireNonNull(getCommand("sniff")).setExecutor(new EggSniffCommand());
 
-        getLogger().info("Successfully started Macguffin 2.0.2");
+        getLogger().info("Successfully started Macguffin " + this.getDescription().getVersion());
     }
 
 
