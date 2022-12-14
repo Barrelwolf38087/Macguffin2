@@ -21,6 +21,7 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BundleMeta;
 import org.bukkit.potion.PotionEffectType;
 
 import java.time.Instant;
@@ -62,7 +63,7 @@ public class EggListener implements Listener {
         if (Egg.data.state != State.VIRGIN) {
             if (Egg.data.state != State.RESPAWNED
                     && event.getEntityType() == EntityType.DROPPED_ITEM
-                    && ((Item) event.getEntity()).getItemStack().getType() == Material.DRAGON_EGG) {
+                    && hasEgg(((Item) event.getEntity()).getItemStack())) {
                 logger.info("Egg dropped");
                 ((Item) event.getEntity()).setCanMobPickup(false);
                 ((Item) event.getEntity()).setCanPlayerPickup(false);
@@ -73,15 +74,21 @@ public class EggListener implements Listener {
 
             } else if (Egg.data.state == State.RESPAWNED
                     && event.getEntityType() == EntityType.DROPPED_ITEM
-                    && ((Item) event.getEntity()).getItemStack().getType() == Material.DRAGON_EGG) {
+                    && hasEgg(((Item) event.getEntity()).getItemStack())) {
                 Egg.data.state = State.ITEM;
                 Egg.save();
+                plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                    if (Egg.data.state == State.ITEM) {
+                        event.getEntity().remove();
+                        plugin.resetEgg();
+                    }
+                }, 20 * 15);
             }
         } else {
             // Fixes being able to push the egg into an unloaded end chunk while in the virgin state
             // by making it functionally impossible to push it far enough in time
             if (event.getEntityType() == EntityType.DROPPED_ITEM
-                    && ((Item) event.getEntity()).getItemStack().getType() == Material.DRAGON_EGG) {
+                    && hasEgg(((Item) event.getEntity()).getItemStack())) {
                 plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
                     if (Egg.data.state == State.VIRGIN) {
                         event.getEntity().remove();
@@ -95,7 +102,7 @@ public class EggListener implements Listener {
 
     @EventHandler
     public void onHopperPickup(InventoryPickupItemEvent event) {
-        if (event.getItem().getItemStack().getType() == Material.DRAGON_EGG) {
+        if (hasEgg(event.getItem().getItemStack())) {
             event.setCancelled(true);
             event.getItem().remove();
         }
@@ -120,13 +127,42 @@ public class EggListener implements Listener {
     public void onInventoryMoveItem(InventoryMoveItemEvent event) {
         if (Egg.data.state != State.VIRGIN) {
 
-            if (event.getItem().getType() == Material.DRAGON_EGG) {
+            if (hasEgg(event.getItem())) {
                 event.setCancelled(true);
                 plugin.getServer().broadcast(Component.text("Hopper shenanigans detected!").color(COLOR));
 
                 plugin.resetEgg();
 
                 plugin.getLogger().info("Intercepted inventory move");
+            }
+        }
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static boolean hasEgg(ItemStack stack) {
+        if (stack == null) {
+            return false;
+        }
+
+        if (stack.getType() == Material.DRAGON_EGG) {
+            return true;
+        } else if (stack.getType() == Material.BUNDLE) {
+            return ((BundleMeta) stack.getItemMeta()).getItems().stream().anyMatch((ItemStack is) -> is.getType() == Material.DRAGON_EGG);
+        }
+
+        return false;
+    }
+
+    public static void removeEgg(Player player) {
+        if (hasEgg(player.getItemOnCursor())) {
+            // What's that? The bundle had other stuff? Tough shit lol
+            player.setItemOnCursor(null);
+        } else {
+            ItemStack[] stacks = player.getInventory().getContents();
+            for (ItemStack stack : stacks) {
+                if (hasEgg(stack)) {
+                    player.getInventory().remove(stack);
+                }
             }
         }
     }
@@ -141,21 +177,60 @@ public class EggListener implements Listener {
 
             if (event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
                 ItemStack stack = event.getCurrentItem();
-                if (stack != null && stack.getType() == Material.DRAGON_EGG) {
+                if (hasEgg(stack)) {
                     event.setCancelled(true);
                     plugin.getLogger().info("Intercepted shift click");
                 }
             }
 
             if (player.getInventory() != clicked && event.getCursor() != null
-                    && event.getCursor().getType() == Material.DRAGON_EGG) {
+                    && hasEgg(event.getCursor())) {
                 event.setCancelled(true);
                 plugin.getLogger().info("Intercepted drag");
             }
 
+
+//            logger.info("clicks");
+//            logger.info("Left click: " + event.isLeftClick());
+//            logger.info(player.getItemOnCursor().toString());
+//            logger.info(event.getCurrentItem().toString());
+//            logger.info(event.getCursor().toString());
+
+            // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+//            // No bundle shenanigans
+//            if (event.getCurrentItem() != null && event.getCursor() != null) {
+//
+//
+//                // I HATE BUNDLES I HATE BUNDLES I HATE BUNDLES
+//                if (event.getCurrentItem().getType() == Material.DRAGON_EGG
+//                    && event.getCursor().getType() == Material.AIR
+//                    && event.isRightClick()) {
+//                    player.setItemOnCursor(null);
+//                    event.setCancelled(true);
+//                    logger.info("bundle shit (type 1)");
+//                } else if (event.getCurrentItem().getType() == Material.BUNDLE
+//                        && event.getCursor().getType() == Material.BUNDLE) {
+//                    if (event.getCursor().getItemMeta() instanceof BundleMeta bundleMeta) {
+//                        if (bundleMeta.getItems().stream().anyMatch((ItemStack stack) -> stack.getType() == Material.DRAGON_EGG)) {
+//                            event.setCancelled(true);
+//                            logger.info("bundle shit (type 2)");
+//                        }
+//
+//                    }
+//                }
+//
+////                if ((event.getCurrentItem().getType() == Material.BUNDLE || event.getCursor().getType() == Material.BUNDLE)
+////                    && (event.getCurrentItem().getType() == Material.DRAGON_EGG || event.getCursor().getType() == Material.DRAGON_EGG)) {
+////                    event.setCancelled(true);
+////                    logger.info("bundle shit");
+////                }
+//
+//            }
+
             if (event.isCancelled()) {
                 plugin.getServer().broadcast(Component.text("Someone tried to put the egg in a container!").color(COLOR));
-                player.getInventory().remove(Material.DRAGON_EGG);
+//                player.getInventory().remove(Material.DRAGON_EGG);
+                removeEgg(player);
                 plugin.resetEgg();
             }
         }
@@ -167,7 +242,8 @@ public class EggListener implements Listener {
 
             if (event.getPlayer().getInventory().contains(Material.DRAGON_EGG)) {
                 plugin.getServer().broadcast(Component.text("Someone logged out with the egg in their inventory!").color(COLOR));
-                event.getPlayer().getInventory().remove(Material.DRAGON_EGG);
+//                event.getPlayer().getInventory().remove(Material.DRAGON_EGG);
+                removeEgg(event.getPlayer());
                 plugin.resetEgg();
             }
         }
@@ -176,7 +252,7 @@ public class EggListener implements Listener {
     @EventHandler
     public void onEntityDamage(EntityDamageEvent event) {
         if (event.getEntity() instanceof Item item) {
-            if (item.getItemStack().getType() == Material.DRAGON_EGG) {
+            if (hasEgg(item.getItemStack())) {
                 UUID thrower = item.getThrower();
                 if (thrower != null) {
                     Player player = Bukkit.getPlayer(thrower);
@@ -211,7 +287,7 @@ public class EggListener implements Listener {
 
     @EventHandler
     public void onItemDespawn(ItemDespawnEvent event) {
-        if (event.getEntity().getItemStack().getType() == Material.DRAGON_EGG) {
+        if (hasEgg(event.getEntity().getItemStack())) {
             UUID thrower = event.getEntity().getThrower();
             if (thrower != null) {
                 Player player = Bukkit.getPlayer(thrower);
@@ -226,7 +302,7 @@ public class EggListener implements Listener {
 
     @EventHandler
     public void onPickupItem(EntityPickupItemEvent event) {
-        if (event.getItem().getItemStack().getType() == Material.DRAGON_EGG) {
+        if (hasEgg(event.getItem().getItemStack())) {
             if (!(event.getEntity() instanceof Player player)) {
                 // Ensure mobs can't pick it up
                 event.setCancelled(true);
@@ -282,8 +358,8 @@ public class EggListener implements Listener {
 
     @EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
-        if (event.getPlayer().getInventory().getItemInMainHand().getType() == Material.DRAGON_EGG
-                || event.getPlayer().getInventory().getItemInOffHand().getType() == Material.DRAGON_EGG) {
+        if (hasEgg(event.getPlayer().getInventory().getItemInMainHand())
+                || hasEgg(event.getPlayer().getInventory().getItemInOffHand())) {
             event.setCancelled(true);
         }
 
