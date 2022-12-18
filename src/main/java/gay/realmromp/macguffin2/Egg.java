@@ -125,4 +125,11 @@ public class Egg implements Serializable {
     }
 
     private Egg(){}
+
+    public String toString() {
+        return "State: " + state.toString() + "\n" + "World: " + world + "\n" +
+                "X: " + x + "\n" +
+                "Y: " + y + "\n" +
+                "Z: " + z;
+    }
 }

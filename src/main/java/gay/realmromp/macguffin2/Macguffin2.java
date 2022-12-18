@@ -5,6 +5,9 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -29,17 +32,22 @@ public class Macguffin2 extends JavaPlugin {
 
     public void resetEgg() {
         // Delete the old egg
-        if (Egg.data.holder != null) {
-            Player player = Bukkit.getPlayer(Egg.data.holder);
-            if (player == null) {
-                getLogger().severe("Warning: last holder had UUID " + Egg.data.holder.toString()
-                        + ", but this player does not exist! The egg may be duped.\n");
-            } else {
-                getLogger().info("Removing egg from " + player.getName() + " (UUID " + player.getUniqueId()
-                    + ")'s inventory");
+//        if (Egg.data.holder != null) {
+//            Player player = Bukkit.getPlayer(Egg.data.holder);
+//            if (player == null) {
+//                getLogger().severe("Warning: last holder had UUID " + Egg.data.holder.toString()
+//                        + ", but this player does not exist! The egg may be duped.\n");
+//            } else {
+//                getLogger().info("Removing egg from " + player.getName() + " (UUID " + player.getUniqueId()
+//                    + ")'s inventory");
+//
+//                Egg.removeFrom(player);
+//            }
+//        }
 
-                Egg.removeFrom(player);
-            }
+        // A desperate attempt to fix a dupe
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            Egg.removeFrom(p);
         }
 
         Location loc = Egg.data.getLocation();
@@ -73,6 +81,16 @@ public class Macguffin2 extends JavaPlugin {
         spawnAbove.setType(Material.OBSIDIAN);
 
         Block spawnAt = spawnAbove.getRelative(BlockFace.UP);
+
+        for (Entity entity : world.getEntities()) {
+            if (entity.getType() == EntityType.DROPPED_ITEM
+                && Egg.hasEgg(((Item) entity).getItemStack())) {
+                ((Item) entity).setCanPlayerPickup(false);
+                ((Item) entity).setCanMobPickup(false);
+                getServer().getScheduler().runTaskLater(this, entity::remove, 1);
+            }
+        }
+
         spawnAt.setType(Material.DRAGON_EGG);
 
         Egg.data.setLocation(spawnAt.getLocation());
@@ -112,6 +130,7 @@ public class Macguffin2 extends JavaPlugin {
         timeCheckTask.runTaskTimer(this, 0, 20 * 30);
 
         Objects.requireNonNull(getCommand("sniff")).setExecutor(new EggSniffCommand());
+        Objects.requireNonNull(getCommand("state")).setExecutor(new EggStateCommand());
 
         getLogger().info("Successfully started Macguffin " + this.getDescription().getVersion());
     }

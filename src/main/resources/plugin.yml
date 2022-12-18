@@ -11,7 +11,14 @@ commands:
     description: Check if the egg is nearby
     usage: /sniff
     permission: macguffin2.sniff
+  state:
+    description: checks the egg state
+    usage: /state
+    permission: macguffin2.state
 permissions:
   macguffin2.sniff:
     description: Allows use of the sniff command
     default: true
+  macguffin2.state:
+    description: Allows use of the state command
+    default: op

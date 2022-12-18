@@ -84,6 +84,7 @@ public class EggListener implements Listener {
                     if (Egg.data.state == State.ITEM) {
                         event.getEntity().remove();
                         plugin.resetEgg();
+                        logger.info("Egg timed out on ground");
                     }
                 }, 20 * 15);
             }
@@ -96,6 +97,7 @@ public class EggListener implements Listener {
                     if (Egg.data.state == State.VIRGIN) {
                         event.getEntity().remove();
                         plugin.resetEgg();
+                        logger.info("Egg timed out on ground");
                     }
                 }, 20 * 15);
             }
@@ -108,21 +110,23 @@ public class EggListener implements Listener {
         if (hasEgg(event.getItem().getItemStack())) {
             event.setCancelled(true);
             event.getItem().remove();
-        }
 
-        UUID thrower = event.getItem().getThrower();
-        if (thrower != null) {
-            Player player = Bukkit.getPlayer(thrower);
+            UUID thrower = event.getItem().getThrower();
+            if (thrower != null) {
+                Player player = Bukkit.getPlayer(thrower);
 
-            if (player != null) {
-                plugin.getServer().broadcast(Component.text(player.getName() + " tried to throw the egg in a hopper!").color(COLOR));
+                if (player != null) {
+                    plugin.getServer().broadcast(Component.text(player.getName() + " tried to throw the egg in a hopper!").color(COLOR));
+                }
             }
+
+            plugin.getLogger().info("Intercepted hopper pickup");
+
+            plugin.getLogger().info("Hopper at " + event.getInventory().getLocation());
+            plugin.getLogger().info("Egg item at " + event.getItem().getLocation());
+
+            plugin.resetEgg();
         }
-
-        plugin.getLogger().info("Intercepted hopper pickup");
-
-        plugin.resetEgg();
-
     }
 
     // This is actually for hoppers/dispensers, and does not get called for players putting items in containers.

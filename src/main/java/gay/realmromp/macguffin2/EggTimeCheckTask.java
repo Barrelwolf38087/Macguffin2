@@ -20,7 +20,10 @@ public class EggTimeCheckTask extends BukkitRunnable {
     @Override
     public void run() {
         if (Instant.now().getEpochSecond() >= Egg.data.expiry) {
+            plugin.getLogger().info("Current time later than expiry");
+            plugin.getLogger().info(Instant.now().getEpochSecond() + ">=" + Egg.data.expiry);
             if (Egg.data.state == State.INVENTORY) {
+                plugin.getLogger().info("In inventory state");
                 plugin.getLogger().info("Resetting egg (inventory timeout)");
                 if (Egg.data.holder != null) {
                     Player player = Bukkit.getPlayer(Egg.data.holder);
@@ -36,6 +39,7 @@ public class EggTimeCheckTask extends BukkitRunnable {
                 }
                 plugin.resetEgg();
             } else if (Egg.data.state == State.PLACED) {
+                plugin.getLogger().info("In placed state");
                 plugin.getLogger().info("Resetting egg (placed timeout)");
                 plugin.resetEgg();
             }
