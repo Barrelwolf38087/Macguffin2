@@ -95,6 +95,13 @@ public class Macguffin2 extends JavaPlugin {
 
         Egg.data.setLocation(spawnAt.getLocation());
 
+        getServer().getScheduler().runTaskLater(this, () -> {
+            if (Egg.data.state == State.RESPAWNED
+                && spawnAt.getType() != Material.DRAGON_EGG) {
+                spawnAt.setType(Material.DRAGON_EGG);
+            }
+        }, 20);
+
         getLogger().info("Egg respawned");
         getServer().sendActionBar(Component.text("The egg has been respawned!").color(COLOR));
 
