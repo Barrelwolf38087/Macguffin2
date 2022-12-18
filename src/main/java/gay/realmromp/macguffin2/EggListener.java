@@ -13,16 +13,12 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
-import org.bukkit.event.inventory.InventoryAction;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryMoveItemEvent;
-import org.bukkit.event.inventory.InventoryPickupItemEvent;
+import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BundleMeta;
 import org.bukkit.potion.PotionEffectType;
 
 import java.time.Instant;
@@ -157,7 +153,8 @@ public class EggListener implements Listener {
             Player player = (Player) event.getWhoClicked();
             Inventory clicked = event.getClickedInventory();
 
-            if (event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+            if (event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY
+                && player.getOpenInventory().getTopInventory().getType() != InventoryType.CRAFTING) {
                 ItemStack stack = event.getCurrentItem();
                 if (hasEgg(stack)) {
                     event.setCancelled(true);
