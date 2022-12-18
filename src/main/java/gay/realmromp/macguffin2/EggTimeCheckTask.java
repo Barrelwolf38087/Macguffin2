@@ -28,7 +28,8 @@ public class EggTimeCheckTask extends BukkitRunnable {
                         player.sendMessage(Component.text("Dumbass").color(COLOR));
                         Bukkit.broadcast(Component.text(player.getName() + " took too long to place the egg! "
                             + "Laugh at this user.").color(COLOR));
-                        Egg.removeFrom(player);
+//                        Egg.removeFrom(player);
+                        plugin.resetEgg();
                     }
                 } else {
                     plugin.getLogger().severe("Egg timed out in inventory, but no holder was set! The egg is duped.");
