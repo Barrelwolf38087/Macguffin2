@@ -74,7 +74,7 @@ public class Macguffin2 extends JavaPlugin {
         World world = getServer().getWorlds().get(0); // Forums say this gets the "main" overworld (undocumented)
 
         Block spawnAbove = world.getHighestBlockAt(0, 0);
-        if (spawnAbove.getLocation().getBlockY() > 319) {
+        if (spawnAbove.getLocation().getBlockY() > 318) {
             spawnAbove = world.getBlockAt(0, 319, 0);
         }
 
@@ -97,8 +97,8 @@ public class Macguffin2 extends JavaPlugin {
 
         getServer().getScheduler().runTaskLater(this, () -> {
             if (Egg.data.state == State.RESPAWNED
-                && spawnAt.getType() != Material.DRAGON_EGG) {
-                spawnAt.setType(Material.DRAGON_EGG);
+                && Egg.data.getLocation().getBlock().getType() != Material.DRAGON_EGG) {
+                Egg.data.getLocation().getBlock().setType(Material.DRAGON_EGG);
             }
         }, 20);
 
